@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe - CookedBook</title>
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-blue: #58a6ff;
+            --accent-green: #238636;
+            --accent-green-hover: #2ea043;
+            --input-bg: #0d1117;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-green);
+            color: white;
+            border-color: rgba(240, 246, 252, 0.1);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-green-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #30363d;
+        }
+
+        form {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        label .hint {
+            font-weight: normal;
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        #message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        #message.success {
+            background-color: rgba(35, 134, 54, 0.15);
+            color: #3fb950;
+            border: 1px solid rgba(35, 134, 54, 0.4);
+        }
+
+        #message.error {
+            background-color: rgba(218, 54, 51, 0.15);
+            color: #f85149;
+            border: 1px solid rgba(218, 54, 51, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Edit Recipe</h1>
+            <a href="/recipes/{{ recipe.id }}" class="btn btn-secondary">Back to Recipe</a>
+        </header>
+
+        <form id="recipeForm">
+            <input type="hidden" name="id" value="{{ recipe.id }}">
+
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" value="{{ recipe.title }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="ingredients">Ingredients <span class="hint">(one per line)</span></label>
+                <textarea id="ingredients" name="ingredients" rows="5">{% for ing in recipe.ingredients %}{{ ing }}
+{% endfor %}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="instructions">Instructions <span class="hint">(one per line)</span></label>
+                <textarea id="instructions" name="instructions" rows="5">{% for inst in recipe.instructions %}{{ inst }}
+{% endfor %}</textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cooking_time">Cooking Time <span class="hint">(minutes)</span></label>
+                    <input type="number" id="cooking_time" name="cooking_time" value="{{ recipe.cooking_time }}" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="servings">Servings</label>
+                    <input type="number" id="servings" name="servings" value="{{ recipe.servings }}" min="1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category">
+                    <option value="Breakfast" {% if recipe.category == 'Breakfast' %}selected{% endif %}>Breakfast</option>
+                    <option value="Lunch" {% if recipe.category == 'Lunch' %}selected{% endif %}>Lunch</option>
+                    <option value="Dinner" {% if recipe.category == 'Dinner' %}selected{% endif %}>Dinner</option>
+                    <option value="Dessert" {% if recipe.category == 'Dessert' %}selected{% endif %}>Dessert</option>
+                    <option value="Snack" {% if recipe.category == 'Snack' %}selected{% endif %}>Snack</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update Recipe</button>
+                <a href="/recipes/{{ recipe.id }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+
+        <p id="message"></p>
+    </div>
+
+    <script>
+        document.getElementById('recipeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const recipeId = formData.get('id');
+            const messageEl = document.getElementById('message');
+
+            // Convert textarea lines to arrays
+            const ingredients = formData.get('ingredients').split('\n').filter(line => line.trim());
+            const instructions = formData.get('instructions').split('\n').filter(line => line.trim());
+
+            const data = {
+                title: formData.get('title'),
+                ingredients: ingredients,
+                instructions: instructions,
+                cooking_time: parseInt(formData.get('cooking_time')) || 0,
+                servings: parseInt(formData.get('servings')) || 1,
+                category: formData.get('category')
+            };
+
+            try {
+                const response = await fetch('/api/recipes/' + recipeId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    messageEl.textContent = 'Recipe updated successfully!';
+                    messageEl.className = 'success';
+                    setTimeout(() => window.location.href = '/recipes/' + recipeId, 1000);
+                } else {
+                    messageEl.textContent = 'Error updating recipe';
+                    messageEl.className = 'error';
+                }
+            } catch (error) {
+                messageEl.textContent = 'Error: ' + error.message;
+                messageEl.className = 'error';
+            }
+        });
+    </script>
+</body>
+</html>
