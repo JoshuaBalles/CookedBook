@@ -29,6 +29,8 @@ CookedBook/
 ├── schemas.py           # Pydantic schemas for request/response validation
 ├── database.py          # SQLite engine and session setup
 ├── requirements.txt     # Python dependencies
+├── Dockerfile           # Docker container configuration
+├── .dockerignore        # Docker ignore file
 ├── cookedbook.db        # SQLite database file (auto-generated)
 └── templates/           # HTML templates
     ├── index.html       # Home page - list all recipes
@@ -67,8 +69,8 @@ CookedBook/
 
 ### Prerequisites
 
-- Python 3.9 or higher
-- Conda (recommended) or pip
+- **For Python:** Python 3.13, Conda (recommended) or pip
+- **For Docker:** Docker installed on your machine
 
 ### Installation
 
@@ -78,22 +80,41 @@ CookedBook/
    cd CookedBook
    ```
 
-2. **Create and activate virtual environment**
+### Running the App
+
+You can run the app using either Python or Docker. Choose the option that works best for you.
+
+#### Option 1: Using Python
+
+1. **Create and activate virtual environment**
    ```bash
-   conda create -n CookedBook python=3.11
+   conda create -n CookedBook python=3.13
    conda activate CookedBook
    ```
 
-3. **Install dependencies**
+2. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-### Running the App
+3. **Run the app**
+   ```bash
+   python3 -m main
+   ```
 
-```bash
-python3 -m main
-```
+#### Option 2: Using Docker
+
+1. **Build the Docker image**
+   ```bash
+   docker build -t cookedbook .
+   ```
+
+2. **Run the container**
+   ```bash
+   docker run -p 8000:8000 cookedbook
+   ```
+
+---
 
 Then open your browser and navigate to: **http://localhost:8000**
 
