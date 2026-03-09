@@ -13,31 +13,35 @@ CookedBook is a hobby project built to help you organize and store your personal
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-|-----------|------------|
-| Backend | FastAPI (Python) |
-| Database | SQLite (via SQLModel) |
-| Frontend | Pure HTML/CSS with Jinja2 Templates |
-| UI Theme | GitHub Dark Mode |
+ | Component | Technology |
+ |-----------|------------|
+ | Backend | FastAPI (Python) |
+ | Database | SQLite (via SQLModel) |
+ | Frontend | Pure HTML/CSS with Jinja2 Templates |
+ | UI Themes | Dark Mode & Light Mode (toggle) |
+ | Static Files | FastAPI StaticFiles mount |
 
 ## 📁 Project Structure
 
-```
-CookedBook/
-├── main.py              # FastAPI application, routes, and CRUD logic
-├── models.py            # SQLModel database model (Recipe table)
-├── schemas.py           # Pydantic schemas for request/response validation
-├── database.py          # SQLite engine and session setup
-├── requirements.txt     # Python dependencies
-├── Dockerfile           # Docker container configuration
-├── .dockerignore        # Docker ignore file
-├── cookedbook.db        # SQLite database file (auto-generated)
-└── templates/           # HTML templates
-    ├── index.html       # Home page - list all recipes
-    ├── create.html      # Form to create a new recipe
-    ├── view.html        # View single recipe details
-    └── edit.html        # Form to edit an existing recipe
-```
+ ```
+ CookedBook/
+ ├── main.py              # FastAPI application, routes, and CRUD logic
+ ├── models.py            # SQLModel database model (Recipe table)
+ ├── schemas.py           # Pydantic schemas for request/response validation
+ ├── database.py          # SQLite engine and session setup
+ ├── requirements.txt     # Python dependencies
+ ├── Dockerfile           # Docker container configuration
+ ├── .dockerignore        # Docker ignore file
+ ├── cookedbook.db        # SQLite database file (auto-generated)
+ ├── static/              # Static assets
+ │   ├── styles.css       # Shared CSS styles (dark/light themes)
+ │   └── theme.js         # Theme toggle functionality
+ └── templates/           # HTML templates
+     ├── index.html       # Home page - list all recipes
+     ├── create.html      # Form to create a new recipe
+     ├── view.html        # View single recipe details
+     └── edit.html        # Form to edit an existing recipe
+ ```
 
 ## 📋 Recipe Model
 
@@ -131,14 +135,16 @@ Then open your browser and navigate to: **http://localhost:8000**
 
 ## 🌟 Features
 
-- ✅ Create, read, update, and delete recipes
-- ✅ Structured ingredients (quantity, unit, name, notes)
-- ✅ Recipe scaling - adjust servings and ingredients scale automatically
-- ✅ Categorize recipes (Breakfast, Lunch, Dinner, Dessert, Snack)
-- ✅ Track cooking time and servings
-- ✅ Beautiful dark mode interface
-- ✅ RESTful API for programmatic access
-- ✅ Legacy ingredient format migration (automatic parsing of old text-based ingredients)
+ - ✅ Create, read, update, and delete recipes
+ - ✅ Structured ingredients (quantity, unit, name, notes)
+ - ✅ Recipe scaling - adjust servings and ingredients scale automatically
+ - ✅ Categorize recipes (Breakfast, Lunch, Dinner, Dessert, Snack)
+ - ✅ Track cooking time and servings
+ - ✅ Dark mode & Light mode with theme toggle
+ - ✅ Theme preference persistence (saved to localStorage)
+ - ✅ Centralized CSS styling (shared across all templates)
+ - ✅ RESTful API for programmatic access
+ - ✅ Legacy ingredient format migration (automatic parsing of old text-based ingredients)
 
 ## 🔮 Future Development Ideas
 
@@ -152,12 +158,18 @@ Then open your browser and navigate to: **http://localhost:8000**
 
 ## 📝 Changelog
 
-### v1.1.0 (Current)
-- **Structured Ingredients**: Ingredients now support quantity, unit, name, and notes fields
-- **Recipe Scaling**: Scale recipes to any serving size with automatic ingredient adjustment
-- **Improved UI**: Add/remove rows for ingredients and instructions with move up/down controls
-- **API Enhancement**: Added `original_servings` field to API responses
-- **Legacy Support**: Automatic migration of old text-based ingredients to structured format
+ ### v1.2.0 (Current)
+ - **Theme Toggle**: Add dark/light mode toggle with persistent user preference
+ - **CSS Refactoring**: Extract inline styles to centralized `static/styles.css`
+ - **Static Files**: Added FastAPI StaticFiles mount for serving static assets
+ - **Accessibility**: Improved accessibility with aria-labels on interactive elements
+
+ ### v1.1.0
+ - **Structured Ingredients**: Ingredients now support quantity, unit, name, and notes fields
+ - **Recipe Scaling**: Scale recipes to any serving size with automatic ingredient adjustment
+ - **Improved UI**: Add/remove rows for ingredients and instructions with move up/down controls
+ - **API Enhancement**: Added `original_servings` field to API responses
+ - **Legacy Support**: Automatic migration of old text-based ingredients to structured format
 
 ### v1.0.0
 - Initial release

@@ -4,287 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Recipe - CookedBook</title>
-    <style>
-        :root {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --bg-tertiary: #21262d;
-            --border-color: #30363d;
-            --text-primary: #c9d1d9;
-            --text-secondary: #8b949e;
-            --accent-blue: #58a6ff;
-            --accent-green: #238636;
-            --accent-green-hover: #2ea043;
-            --input-bg: #0d1117;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: 6px;
-            text-decoration: none;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--accent-green);
-            color: white;
-            border-color: rgba(240, 246, 252, 0.1);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-green-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-            border-color: var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background-color: #30363d;
-        }
-
-        form {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1.5rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            font-size: 0.875rem;
-        }
-
-        label .hint {
-            font-weight: normal;
-            color: var(--text-secondary);
-            font-size: 0.8125rem;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        #message {
-            margin-top: 1rem;
-            padding: 0.75rem;
-            border-radius: 6px;
-            font-size: 0.875rem;
-        }
-
-        #message.success {
-            background-color: rgba(35, 134, 54, 0.15);
-            color: #3fb950;
-            border: 1px solid rgba(35, 134, 54, 0.4);
-        }
-
-        #message.error {
-            background-color: rgba(218, 54, 51, 0.15);
-            color: #f85149;
-            border: 1px solid rgba(218, 54, 51, 0.4);
-        }
-
-        .ingredient-row {
-            display: grid;
-            grid-template-columns: 80px 100px 1fr 100px 32px;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            align-items: start;
-        }
-
-        .ingredient-row input {
-            padding: 0.375rem 0.5rem;
-            font-size: 0.8125rem;
-        }
-
-        .ingredient-row .remove-btn {
-            padding: 0.375rem;
-            background-color: var(--accent-red);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            line-height: 1;
-        }
-
-        .ingredient-row .remove-btn:hover {
-            background-color: var(--accent-red-hover);
-        }
-
-        .add-ingredient-btn {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-
-        .add-ingredient-btn:hover {
-            background-color: #30363d;
-        }
-
-        .instruction-row {
-            display: grid;
-            grid-template-columns: 32px 1fr 32px 32px;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            align-items: start;
-        }
-
-        .instruction-row textarea {
-            padding: 0.375rem 0.5rem;
-            font-size: 0.8125rem;
-            min-height: 60px;
-            resize: vertical;
-        }
-
-        .instruction-row .move-btn {
-            padding: 0.375rem;
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            line-height: 1;
-        }
-
-        .instruction-row .move-btn:hover {
-            background-color: #30363d;
-        }
-
-        .instruction-row .remove-btn {
-            padding: 0.375rem;
-            background-color: var(--accent-red);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1rem;
-            line-height: 1;
-        }
-
-        .instruction-row .remove-btn:hover {
-            background-color: var(--accent-red-hover);
-        }
-
-        .add-instruction-btn {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-
-        .add-instruction-btn:hover {
-            background-color: #30363d;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        (function() {
+            const saved = localStorage.getItem('cookedbook-theme');
+            if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>Edit Recipe</h1>
-            <a href="/recipes/{{ recipe.id }}" class="btn btn-secondary">Back to Recipe</a>
+            <div class="header-right">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark and light mode">
+                    <span class="icon-moon">🌙</span>
+                    <span class="icon-sun">☀️</span>
+                </button>
+                <a href="/recipes/{{ recipe.id }}" class="btn btn-secondary">Back to Recipe</a>
+            </div>
         </header>
 
         <form id="recipeForm">
             <input type="hidden" name="id" value="{{ recipe.id }}">
 
-            <div class="form-group">
-                <label for="title">Title</label>
-                <input type="text" id="title" name="title" value="{{ recipe.title }}" required>
+            <div class="title-category-row">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" value="{{ recipe.title }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" name="category">
+                        <option value="Breakfast" {% if recipe.category == 'Breakfast' %}selected{% endif %}>Breakfast</option>
+                        <option value="Lunch" {% if recipe.category == 'Lunch' %}selected{% endif %}>Lunch</option>
+                        <option value="Dinner" {% if recipe.category == 'Dinner' %}selected{% endif %}>Dinner</option>
+                        <option value="Dessert" {% if recipe.category == 'Dessert' %}selected{% endif %}>Dessert</option>
+                        <option value="Snack" {% if recipe.category == 'Snack' %}selected{% endif %}>Snack</option>
+                    </select>
+                </div>
             </div>
 
             <div class="form-group">
@@ -345,17 +105,6 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="category">Category</label>
-                <select id="category" name="category">
-                    <option value="Breakfast" {% if recipe.category == 'Breakfast' %}selected{% endif %}>Breakfast</option>
-                    <option value="Lunch" {% if recipe.category == 'Lunch' %}selected{% endif %}>Lunch</option>
-                    <option value="Dinner" {% if recipe.category == 'Dinner' %}selected{% endif %}>Dinner</option>
-                    <option value="Dessert" {% if recipe.category == 'Dessert' %}selected{% endif %}>Dessert</option>
-                    <option value="Snack" {% if recipe.category == 'Snack' %}selected{% endif %}>Snack</option>
-                </select>
-            </div>
-
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">Update Recipe</button>
                 <a href="/recipes/{{ recipe.id }}" class="btn btn-secondary">Cancel</a>
@@ -365,6 +114,7 @@
         <p id="message"></p>
     </div>
 
+    <script src="/static/theme.js"></script>
     <script>
         function addIngredientRow() {
             const container = document.getElementById('ingredients-container');

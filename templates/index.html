@@ -4,198 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CookedBook - My Recipes</title>
-    <style>
-        :root {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --bg-tertiary: #21262d;
-            --border-color: #30363d;
-            --text-primary: #c9d1d9;
-            --text-secondary: #8b949e;
-            --accent-blue: #58a6ff;
-            --accent-green: #238636;
-            --accent-green-hover: #2ea043;
-            --accent-red: #da3633;
-            --accent-red-hover: #f85149;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 2rem;
-        }
-
-        h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-        }
-
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 0.25rem;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border-radius: 6px;
-            text-decoration: none;
-            cursor: pointer;
-            border: 1px solid transparent;
-            transition: background-color 0.2s, border-color 0.2s;
-        }
-
-        .btn-primary {
-            background-color: var(--accent-green);
-            color: white;
-            border-color: rgba(240, 246, 252, 0.1);
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-green-hover);
-        }
-
-        .btn-secondary {
-            background-color: var(--bg-tertiary);
-            color: var(--text-primary);
-            border-color: var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background-color: #30363d;
-        }
-
-        .btn-danger {
-            background-color: var(--accent-red);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: var(--accent-red-hover);
-        }
-
-        .btn-link {
-            background: none;
-            color: var(--accent-blue);
-            padding: 0;
-        }
-
-        .btn-link:hover {
-            text-decoration: underline;
-        }
-
-        h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .recipe-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .recipe-card {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 1rem 1.25rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: border-color 0.2s;
-        }
-
-        .recipe-card:hover {
-            border-color: var(--text-secondary);
-        }
-
-        .recipe-info h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .recipe-info h3 a {
-            color: var(--accent-blue);
-            text-decoration: none;
-        }
-
-        .recipe-info h3 a:hover {
-            text-decoration: underline;
-        }
-
-        .recipe-meta {
-            font-size: 0.8125rem;
-            color: var(--text-secondary);
-        }
-
-        .recipe-meta span {
-            margin-right: 1rem;
-        }
-
-        .recipe-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state p {
-            margin-bottom: 1rem;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.125rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            border-radius: 2em;
-            background-color: var(--bg-tertiary);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-color);
-        }
-    </style>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        (function() {
+            const saved = localStorage.getItem('cookedbook-theme');
+            if (saved === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
         <header>
-            <div>
+            <div class="header-left">
                 <h1>CookedBook</h1>
                 <p class="subtitle">My Personal Recipe Collection</p>
             </div>
-            <a href="/create" class="btn btn-primary">Add New Recipe</a>
+            <div class="header-right">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark and light mode">
+                    <span class="icon-moon">🌙</span>
+                    <span class="icon-sun">☀️</span>
+                </button>
+                <a href="/create" class="btn btn-primary">Add New Recipe</a>
+            </div>
         </header>
 
         <main>
@@ -228,5 +60,6 @@
             {% endif %}
         </main>
     </div>
+    <script src="/static/theme.js"></script>
 </body>
 </html>

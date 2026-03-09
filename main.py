@@ -14,6 +14,9 @@ from schemas import RecipeCreate, RecipeUpdate, RecipeResponse, Ingredient
 # Create FastAPI app
 app = FastAPI(title="CookedBook")
 
+# Serve static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # Setup templates
 templates = Jinja2Templates(directory="templates")
 
