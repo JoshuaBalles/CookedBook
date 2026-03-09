@@ -45,11 +45,22 @@ CookedBook/
 |-------|------|-------------|
 | `id` | Integer | Auto-generated unique identifier |
 | `title` | String | Recipe name |
-| `ingredients` | List[String] | List of ingredients (stored as JSON) |
+| `ingredients` | List[Ingredient] | List of ingredients with quantity, unit, name, and notes (stored as JSON) |
 | `instructions` | List[String] | Step-by-step cooking instructions |
 | `cooking_time` | Integer | Cooking time in minutes |
 | `servings` | Integer | Number of servings |
 | `category` | Enum | Breakfast, Lunch, Dinner, Dessert, or Snack |
+
+### Ingredient Structure
+
+Each ingredient is stored as a structured object:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `quantity` | Float | Numeric quantity (e.g., 2.5) |
+| `unit` | String | Unit of measurement (e.g., cups, tbsp, g) |
+| `name` | String | Ingredient name (e.g., flour, eggs) |
+| `notes` | String | Optional notes (e.g., sifted, room temperature) |
 
 ## 🔌 API Endpoints
 
@@ -121,21 +132,40 @@ Then open your browser and navigate to: **http://localhost:8000**
 ## 🌟 Features
 
 - ✅ Create, read, update, and delete recipes
+- ✅ Structured ingredients (quantity, unit, name, notes)
+- ✅ Recipe scaling - adjust servings and ingredients scale automatically
 - ✅ Categorize recipes (Breakfast, Lunch, Dinner, Dessert, Snack)
 - ✅ Track cooking time and servings
 - ✅ Beautiful dark mode interface
 - ✅ RESTful API for programmatic access
+- ✅ Legacy ingredient format migration (automatic parsing of old text-based ingredients)
 
 ## 🔮 Future Development Ideas
 
 - 📷 Add recipe photos/images
 - 🔍 Add search and filtering functionality
-- 📐 Add ingredient scaling
 - 📄 Add export to PDF
 - 📅 Add meal planning features
 - 🖨️ Add print-friendly view
 - 👤 Add user authentication
 - ⭐ Add recipe ratings and favorites
+
+## 📝 Changelog
+
+### v1.1.0 (Current)
+- **Structured Ingredients**: Ingredients now support quantity, unit, name, and notes fields
+- **Recipe Scaling**: Scale recipes to any serving size with automatic ingredient adjustment
+- **Improved UI**: Add/remove rows for ingredients and instructions with move up/down controls
+- **API Enhancement**: Added `original_servings` field to API responses
+- **Legacy Support**: Automatic migration of old text-based ingredients to structured format
+
+### v1.0.0
+- Initial release
+- Basic CRUD operations for recipes
+- Recipe categorization (Breakfast, Lunch, Dinner, Dessert, Snack)
+- Cooking time and servings tracking
+- RESTful API
+- Dark mode UI
 
 ## 📄 License
 

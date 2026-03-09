@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, Field, model_validator
+from typing import Optional, List, Union
 from enum import Enum
 
 
@@ -11,13 +11,28 @@ class RecipeCategory(str, Enum):
     SNACK = "Snack"
 
 
+class Ingredient(BaseModel):
+    """Structured ingredient schema with quantity, unit, name, and notes."""
+    quantity: float = Field(default=0, ge=0)
+    unit: str = ""
+    name: str = ""
+    notes: str = ""
+
+    @model_validator(mode='after')
+    def validate_ingredient(self):
+        """Validate ingredient fields."""
+        if self.quantity is not None and self.quantity < 0:
+            raise ValueError('Quantity cannot be negative')
+        return self
+
+
 class RecipeBase(BaseModel):
     """Base recipe schema with common fields."""
     title: str
-    ingredients: List[str] = []
+    ingredients: List[Union[str, Ingredient]] = []
     instructions: List[str] = []
-    cooking_time: int = 0  # In minutes
-    servings: int = 1
+    cooking_time: int = Field(default=0, ge=0)
+    servings: int = Field(default=1, ge=1)
     category: RecipeCategory = RecipeCategory.DINNER
 
 
@@ -29,7 +44,7 @@ class RecipeCreate(RecipeBase):
 class RecipeUpdate(BaseModel):
     """Schema for updating a recipe - all fields optional."""
     title: Optional[str] = None
-    ingredients: Optional[List[str]] = None
+    ingredients: Optional[List[Union[str, Ingredient]]] = None
     instructions: Optional[List[str]] = None
     cooking_time: Optional[int] = None
     servings: Optional[int] = None
@@ -39,6 +54,7 @@ class RecipeUpdate(BaseModel):
 class RecipeResponse(RecipeBase):
     """Schema for recipe response."""
     id: int
+    original_servings: Optional[int] = None
 
     class Config:
         from_attributes = True

@@ -1,5 +1,6 @@
 import json
-from typing import List
+import re
+from typing import List, Union
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -8,7 +9,7 @@ from sqlmodel import Session, select
 
 from database import create_db_and_tables, get_session
 from models import Recipe
-from schemas import RecipeCreate, RecipeUpdate, RecipeResponse
+from schemas import RecipeCreate, RecipeUpdate, RecipeResponse, Ingredient
 
 # Create FastAPI app
 app = FastAPI(title="CookedBook")
@@ -24,14 +25,121 @@ def on_startup():
 
 
 # Helper functions to convert between JSON string and list
-def ingredients_to_json(ingredients: List[str]) -> str:
-    return json.dumps(ingredients)
+def ingredients_to_json(ingredients: List[Union[str, dict, Ingredient]]) -> str:
+    """Convert ingredients list to JSON string."""
+    # Convert any ingredient to dict format
+    result = []
+    for ing in ingredients:
+        if isinstance(ing, str):
+            # Legacy string format - try to parse it
+            result.append(_parse_legacy_ingredient(ing))
+        elif isinstance(ing, Ingredient):
+            result.append(ing.model_dump())
+        elif isinstance(ing, dict):
+            result.append(ing)
+        else:
+            result.append({"quantity": 0, "unit": "", "name": str(ing), "notes": ""})
+    return json.dumps(result)
 
 
-def json_to_ingredients(json_str: str) -> List[str]:
+def instructions_to_json(instructions: List[str]) -> str:
+    """Convert instructions list to JSON string (simple strings, not structured)."""
+    return json.dumps(instructions)
+
+
+def _parse_legacy_ingredient(ingredient_str: str) -> dict:
+    """Parse a legacy string ingredient into structured format."""
+    # Common patterns: "2 cups flour", "1 tsp salt", "3 eggs", "1 1/2 cups flour"
+    
+    # Pattern to match quantity at the start (supports simple fractions and mixed fractions)
+    quantity_pattern = r'^([\d]+[\s]+[\d]+/[\d]+|[\d]+/[\d]+|[\d]+)\s*'
+    match = re.match(quantity_pattern, ingredient_str)
+    
+    if match:
+        quantity_str = match.group(1).strip()
+        try:
+            if ' ' in quantity_str:  # Handle mixed fractions like "1 1/2"
+                whole, frac = quantity_str.split()
+                num, denom = frac.split('/')
+                quantity = float(whole) + float(num) / float(denom)
+            elif '/' in quantity_str:  # Handle simple fractions like "1/2"
+                num, denom = quantity_str.split('/')
+                quantity = float(num) / float(denom)
+            else:
+                quantity = float(quantity_str)
+        except ValueError:
+            quantity = 0
+        rest = ingredient_str[match.end():].strip()
+    else:
+        quantity = 0
+        rest = ingredient_str.strip()
+    
+    # Common units to detect
+    units = ['cups', 'cup', 'tbsp', 'tablespoon', 'tablespoons', 'tsp', 'teaspoon',
+             'teaspoons', 'oz', 'ounce', 'ounces', 'lb', 'lbs', 'pound', 'pounds',
+             'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms', 'ml', 'milliliter',
+             'l', 'liter', 'liters', 'each', 'pinch', 'clove', 'cloves']
+    
+    unit = ""
+    name = rest
+    
+    # Check if first word is a unit
+    words = rest.split()
+    if words and words[0].lower() in units:
+        unit = words[0]
+        name = " ".join(words[1:])
+    
+    return {
+        "quantity": quantity,
+        "unit": unit,
+        "name": name,
+        "notes": ""
+    }
+
+
+def json_to_ingredients(json_str: str) -> List[dict]:
+    """Convert JSON string to list of ingredient dicts."""
     if not json_str:
         return []
-    return json.loads(json_str)
+    try:
+        ingredients = json.loads(json_str)
+        # Handle both old string format and new dict format
+        result = []
+        for ing in ingredients:
+            if isinstance(ing, str):
+                result.append(_parse_legacy_ingredient(ing))
+            else:
+                result.append(ing)
+        return result
+    except json.JSONDecodeError:
+        return []
+
+
+def json_to_instructions(json_str: str) -> List[str]:
+    """Convert JSON string to list of instruction strings."""
+    if not json_str:
+        return []
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        return []
+
+
+def scale_ingredient(ingredient: dict, scale_factor: float) -> dict:
+    """Scale an ingredient by the given factor."""
+    scaled = ingredient.copy()
+    if 'quantity' in scaled and scaled['quantity'] is not None:
+        scaled['quantity'] = scaled['quantity'] * scale_factor
+    return scaled
+
+
+def get_scaled_ingredients(ingredients: List[dict], original_servings: int, desired_servings: int) -> List[dict]:
+    """Get ingredients scaled for desired servings."""
+    if original_servings <= 0 or desired_servings <= 0:
+        return ingredients
+    
+    scale_factor = desired_servings / original_servings
+    return [scale_ingredient(ing, scale_factor) for ing in ingredients]
 
 
 # HTML Routes
@@ -47,7 +155,7 @@ def home(request: Request, session: Session = Depends(get_session)):
             "id": recipe.id,
             "title": recipe.title,
             "ingredients": json_to_ingredients(recipe.ingredients),
-            "instructions": json_to_ingredients(recipe.instructions),
+            "instructions": json_to_instructions(recipe.instructions),
             "cooking_time": recipe.cooking_time,
             "servings": recipe.servings,
             "category": recipe.category
@@ -66,19 +174,33 @@ def create_page(request: Request):
 
 
 @app.get("/recipes/{recipe_id}", response_class=HTMLResponse)
-def view_recipe(request: Request, recipe_id: int, session: Session = Depends(get_session)):
-    """View single recipe."""
+def view_recipe(request: Request, recipe_id: int, servings: int = None, session: Session = Depends(get_session)):
+    """View single recipe with optional scaling."""
     recipe = session.get(Recipe, recipe_id)
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     
+    # Get base ingredients
+    ingredients = json_to_ingredients(recipe.ingredients)
+    
+    # Apply scaling if requested (with upper bound validation)
+    original_servings = recipe.servings
+    if servings and servings > 0:
+        display_servings = min(servings, 1000)  # Cap at 1000 servings
+    else:
+        display_servings = original_servings
+    
+    if servings and servings != original_servings:
+        ingredients = get_scaled_ingredients(ingredients, original_servings, servings)
+    
     recipe_data = {
         "id": recipe.id,
         "title": recipe.title,
-        "ingredients": json_to_ingredients(recipe.ingredients),
-        "instructions": json_to_ingredients(recipe.instructions),
+        "ingredients": ingredients,
+        "instructions": json_to_instructions(recipe.instructions),
         "cooking_time": recipe.cooking_time,
-        "servings": recipe.servings,
+        "servings": display_servings,
+        "original_servings": original_servings,
         "category": recipe.category
     }
     
@@ -99,7 +221,7 @@ def edit_page(request: Request, recipe_id: int, session: Session = Depends(get_s
         "id": recipe.id,
         "title": recipe.title,
         "ingredients": json_to_ingredients(recipe.ingredients),
-        "instructions": json_to_ingredients(recipe.instructions),
+        "instructions": json_to_instructions(recipe.instructions),
         "cooking_time": recipe.cooking_time,
         "servings": recipe.servings,
         "category": recipe.category
@@ -118,7 +240,7 @@ def create_recipe(recipe: RecipeCreate, session: Session = Depends(get_session))
     db_recipe = Recipe(
         title=recipe.title,
         ingredients=ingredients_to_json(recipe.ingredients),
-        instructions=ingredients_to_json(recipe.instructions),
+        instructions=instructions_to_json(recipe.instructions),
         cooking_time=recipe.cooking_time,
         servings=recipe.servings,
         category=recipe.category.value
@@ -131,9 +253,10 @@ def create_recipe(recipe: RecipeCreate, session: Session = Depends(get_session))
         id=db_recipe.id,
         title=db_recipe.title,
         ingredients=json_to_ingredients(db_recipe.ingredients),
-        instructions=json_to_ingredients(db_recipe.instructions),
+        instructions=json_to_instructions(db_recipe.instructions),
         cooking_time=db_recipe.cooking_time,
         servings=db_recipe.servings,
+        original_servings=db_recipe.servings,
         category=db_recipe.category
     )
 
@@ -148,9 +271,10 @@ def list_recipes(session: Session = Depends(get_session)):
             id=r.id,
             title=r.title,
             ingredients=json_to_ingredients(r.ingredients),
-            instructions=json_to_ingredients(r.instructions),
+            instructions=json_to_instructions(r.instructions),
             cooking_time=r.cooking_time,
             servings=r.servings,
+            original_servings=r.servings,
             category=r.category
         )
         for r in recipes
@@ -168,9 +292,10 @@ def get_recipe(recipe_id: int, session: Session = Depends(get_session)):
         id=recipe.id,
         title=recipe.title,
         ingredients=json_to_ingredients(recipe.ingredients),
-        instructions=json_to_ingredients(recipe.instructions),
+        instructions=json_to_instructions(recipe.instructions),
         cooking_time=recipe.cooking_time,
         servings=recipe.servings,
+        original_servings=recipe.servings,
         category=recipe.category
     )
 
@@ -187,7 +312,7 @@ def update_recipe(recipe_id: int, recipe_update: RecipeUpdate, session: Session 
     if "ingredients" in update_data:
         recipe.ingredients = ingredients_to_json(update_data.pop("ingredients"))
     if "instructions" in update_data:
-        recipe.instructions = ingredients_to_json(update_data.pop("instructions"))
+        recipe.instructions = instructions_to_json(update_data.pop("instructions"))
     if "category" in update_data:
         update_data["category"] = update_data["category"].value
     
@@ -202,9 +327,10 @@ def update_recipe(recipe_id: int, recipe_update: RecipeUpdate, session: Session 
         id=recipe.id,
         title=recipe.title,
         ingredients=json_to_ingredients(recipe.ingredients),
-        instructions=json_to_ingredients(recipe.instructions),
+        instructions=json_to_instructions(recipe.instructions),
         cooking_time=recipe.cooking_time,
         servings=recipe.servings,
+        original_servings=recipe.servings,
         category=recipe.category
     )
 
