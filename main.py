@@ -1,5 +1,6 @@
 import json
 import re
+from contextlib import asynccontextmanager
 from typing import List, Union
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
@@ -11,20 +12,23 @@ from database import create_db_and_tables, get_session
 from models import Recipe
 from schemas import RecipeCreate, RecipeUpdate, RecipeResponse, Ingredient
 
-# Create FastAPI app
-app = FastAPI(title="CookedBook")
+
+# Create FastAPI app with lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create database tables
+    create_db_and_tables()
+    yield
+    # Shutdown: cleanup if needed
+
+
+app = FastAPI(title="CookedBook", lifespan=lifespan)
 
 # Serve static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Setup templates
 templates = Jinja2Templates(directory="templates")
-
-
-# Create database tables on startup
-@app.on_event("startup")
-def on_startup():
-    create_db_and_tables()
 
 
 # Helper functions to convert between JSON string and list
