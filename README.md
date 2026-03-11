@@ -31,6 +31,7 @@ CookedBook is a hobby project built to help you organize and store your personal
  ├── database.py          # SQLite engine and session setup
  ├── requirements.txt     # Python dependencies
  ├── Dockerfile           # Docker container configuration
+ ├── docker-compose.yml   # Docker Compose orchestration
  ├── .dockerignore        # Docker ignore file
  ├── cookedbook.db        # SQLite database file (auto-generated)
  ├── static/              # Static assets
@@ -129,6 +130,25 @@ You can run the app using either Python or Docker. Choose the option that works 
    docker run -p 8000:8000 cookedbook
    ```
 
+#### Option 3: Using Docker Compose (Recommended)
+
+Docker Compose provides a simpler setup with persistent database storage and hot reload support.
+
+1. **Start the application**
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **View logs**
+   ```bash
+   docker-compose logs -f
+   ```
+
+3. **Stop the application**
+   ```bash
+   docker-compose down
+   ```
+
 ---
 
 Then open your browser and navigate to: **http://localhost:8000**
@@ -158,7 +178,13 @@ Then open your browser and navigate to: **http://localhost:8000**
 
 ## 📝 Changelog
 
- ### v1.2.0 (Current)
+ ### v1.3.0 (Current)
+ - **Docker Support**: Added Dockerfile and docker-compose.yml for containerized deployment
+ - **Persistent Database**: Database now stored in /data volume for persistence across container restarts
+ - **Hot Reload**: Uvicorn with --reload for development workflow
+ - **Healthcheck**: Container health monitoring with Python-based health check
+
+ ### v1.2.0
  - **Theme Toggle**: Add dark/light mode toggle with persistent user preference
  - **CSS Refactoring**: Extract inline styles to centralized `static/styles.css`
  - **Static Files**: Added FastAPI StaticFiles mount for serving static assets
