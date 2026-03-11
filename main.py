@@ -2,6 +2,7 @@ import json
 import re
 from contextlib import asynccontextmanager
 from typing import List, Union
+from datetime import datetime, timezone
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -165,7 +166,9 @@ def home(request: Request, session: Session = Depends(get_session)):
             "instructions": json_to_instructions(recipe.instructions),
             "cooking_time": recipe.cooking_time,
             "servings": recipe.servings,
-            "category": recipe.category
+            "category": recipe.category,
+            "created_at": recipe.created_at,
+            "updated_at": recipe.updated_at
         })
     
     return templates.TemplateResponse("index.html", {
@@ -208,7 +211,9 @@ def view_recipe(request: Request, recipe_id: int, servings: int = None, session:
         "cooking_time": recipe.cooking_time,
         "servings": display_servings,
         "original_servings": original_servings,
-        "category": recipe.category
+        "category": recipe.category,
+        "created_at": recipe.created_at,
+        "updated_at": recipe.updated_at
     }
     
     return templates.TemplateResponse("view.html", {
@@ -244,13 +249,16 @@ def edit_page(request: Request, recipe_id: int, session: Session = Depends(get_s
 @app.post("/api/recipes", response_model=RecipeResponse)
 def create_recipe(recipe: RecipeCreate, session: Session = Depends(get_session)):
     """Create a new recipe."""
+    now = datetime.now(timezone.utc)
     db_recipe = Recipe(
         title=recipe.title,
         ingredients=ingredients_to_json(recipe.ingredients),
         instructions=instructions_to_json(recipe.instructions),
         cooking_time=recipe.cooking_time,
         servings=recipe.servings,
-        category=recipe.category.value
+        category=recipe.category.value,
+        created_at=now,
+        updated_at=now
     )
     session.add(db_recipe)
     session.commit()
@@ -264,7 +272,9 @@ def create_recipe(recipe: RecipeCreate, session: Session = Depends(get_session))
         cooking_time=db_recipe.cooking_time,
         servings=db_recipe.servings,
         original_servings=db_recipe.servings,
-        category=db_recipe.category
+        category=db_recipe.category,
+        created_at=db_recipe.created_at,
+        updated_at=db_recipe.updated_at
     )
 
 
@@ -282,7 +292,9 @@ def list_recipes(session: Session = Depends(get_session)):
             cooking_time=r.cooking_time,
             servings=r.servings,
             original_servings=r.servings,
-            category=r.category
+            category=r.category,
+            created_at=r.created_at,
+            updated_at=r.updated_at
         )
         for r in recipes
     ]
@@ -303,7 +315,9 @@ def get_recipe(recipe_id: int, session: Session = Depends(get_session)):
         cooking_time=recipe.cooking_time,
         servings=recipe.servings,
         original_servings=recipe.servings,
-        category=recipe.category
+        category=recipe.category,
+        created_at=recipe.created_at,
+        updated_at=recipe.updated_at
     )
 
 
@@ -326,6 +340,9 @@ def update_recipe(recipe_id: int, recipe_update: RecipeUpdate, session: Session 
     for field, value in update_data.items():
         setattr(recipe, field, value)
     
+    # Update the timestamp
+    recipe.updated_at = datetime.now(timezone.utc)
+    
     session.add(recipe)
     session.commit()
     session.refresh(recipe)
@@ -338,7 +355,9 @@ def update_recipe(recipe_id: int, recipe_update: RecipeUpdate, session: Session 
         cooking_time=recipe.cooking_time,
         servings=recipe.servings,
         original_servings=recipe.servings,
-        category=recipe.category
+        category=recipe.category,
+        created_at=recipe.created_at,
+        updated_at=recipe.updated_at
     )
 
 

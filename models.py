@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional, List
 from enum import Enum
+from datetime import datetime, timezone
 
 
 class RecipeCategory(str, Enum):
@@ -23,3 +24,5 @@ class Recipe(SQLModel, table=True):
     cooking_time: int = Field(default=0)  # In minutes
     servings: int = Field(default=1)
     category: str = Field(default=RecipeCategory.DINNER.value)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

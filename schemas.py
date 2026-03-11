@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, model_validator
 from typing import Optional, List, Union
 from enum import Enum
+from datetime import datetime
 
 
 class RecipeCategory(str, Enum):
@@ -55,6 +56,8 @@ class RecipeResponse(RecipeBase):
     """Schema for recipe response."""
     id: int
     original_servings: Optional[int] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
